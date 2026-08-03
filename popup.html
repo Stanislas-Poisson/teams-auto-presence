@@ -1,0 +1,275 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Teams Auto Presence</title>
+    <style>
+      :root {
+        --bg: #0d0e12;
+        --card: #161822;
+        --border: #262a38;
+        --text: #e4e6eb;
+        --muted: #8b8f9c;
+        --accent: #6264a7;
+        --accent-hover: #7477bd;
+        --ok: #37d67a;
+        --warn: #f2b636;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        width: 21rem;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 0.85rem;
+      }
+      .page {
+        padding: 1rem;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.9rem;
+      }
+      .header img {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+      }
+      .header h1 {
+        font-size: 0.95rem;
+        margin: 0;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.85rem;
+        margin-bottom: 0.7rem;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.3rem 0;
+      }
+      .row .label {
+        color: var(--muted);
+      }
+      .row .value {
+        font-weight: 500;
+        text-align: right;
+      }
+      .pause-banner {
+        display: none;
+        background: rgba(242, 182, 54, 0.12);
+        border: 1px solid rgba(242, 182, 54, 0.4);
+        color: var(--warn);
+        border-radius: 8px;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.78rem;
+        margin-bottom: 0.7rem;
+        line-height: 1.4;
+      }
+      .pause-banner.visible {
+        display: block;
+      }
+      .dot {
+        display: inline-block;
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        margin-right: 0.4rem;
+        background: var(--muted);
+      }
+      .dot.captured {
+        background: var(--ok);
+      }
+      button {
+        font: inherit;
+        font-size: 0.82rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+      button:hover {
+        border-color: var(--accent);
+        color: var(--accent-hover);
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      button.primary:hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+        color: #fff;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      .field-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .switch {
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        width: 2.2rem;
+        height: 1.3rem;
+        border-radius: 999px;
+        background: #2b2f3d;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .switch::before {
+        content: "";
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform 0.15s ease;
+      }
+      .switch:checked {
+        background: var(--accent);
+      }
+      .switch:checked::before {
+        transform: translateX(0.9rem);
+      }
+      #status {
+        color: var(--ok);
+        font-size: 0.75rem;
+        text-align: center;
+        min-height: 1rem;
+      }
+      footer {
+        margin-top: 1rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid var(--border);
+      }
+      footer .made-by {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin: 0 0 0.5rem;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .pills a {
+        --pill: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.68rem;
+        padding: 0.25rem 0.55rem 0.25rem 0.45rem;
+        border-radius: 999px;
+        text-decoration: none;
+        border: 1px solid color-mix(in srgb, var(--pill) 35%, var(--border));
+        background: color-mix(in srgb, var(--pill) 10%, transparent);
+        color: color-mix(in srgb, var(--pill) 70%, white);
+        transition: all 0.15s ease;
+      }
+      .pills a svg {
+        width: 12px;
+        height: 12px;
+        fill: currentColor;
+        flex-shrink: 0;
+      }
+      .pills a:hover {
+        color: #fff;
+        background: var(--pill);
+        border-color: var(--pill);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <img src="icons/icon48.png" alt="" />
+        <h1>Teams Auto Presence</h1>
+      </div>
+
+      <div id="pauseBanner" class="pause-banner">
+        Paused (manual change detected). Will resume automatically at the
+        next schedule change, or right away with the button below.
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <span class="label">Current target</span>
+          <span class="value" id="target">-</span>
+        </div>
+        <div class="row">
+          <span class="label">Last applied status</span>
+          <span class="value" id="lastApplied">-</span>
+        </div>
+        <div class="row">
+          <span class="label">Skypetoken</span>
+          <span class="value"><span class="dot" id="tokenDot"></span><span id="tokenText">not captured</span></span>
+        </div>
+      </div>
+
+      <button id="resume" class="primary" disabled>Resume automation</button>
+
+      <div class="card">
+        <label class="field-row" for="debug">
+          <span>Debug mode (see Teams console)</span>
+          <input type="checkbox" id="debug" class="switch" />
+        </label>
+      </div>
+
+      <button id="openOptions">Configure schedule and statuses...</button>
+      <div id="status"></div>
+
+      <footer>
+        <p class="made-by">Made by Stanislas Poisson (Zairakai)</p>
+        <div class="pills">
+          <a style="--pill:#8b96a3" href="https://github.com/Stanislas-Poisson" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            GitHub
+          </a>
+          <a style="--pill:#fc6d26" href="https://gitlab.com/Stanislas-Poisson" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m23.6004 9.5927-.0337-.0862L20.3.9814a.851.851 0 0 0-.3362-.405.8748.8748 0 0 0-.9997.0539.8748.8748 0 0 0-.29.4399l-2.2055 6.748H7.5375l-2.2057-6.748a.8573.8573 0 0 0-.29-.4412.8748.8748 0 0 0-.9997-.0537.8585.8585 0 0 0-.3362.4049L.4332 9.5015l-.0325.0862a6.0657 6.0657 0 0 0 2.0119 7.0105l.0113.0087.03.0213 4.976 3.7256 2.462 1.8636 1.4995 1.1321a1.0085 1.0085 0 0 0 1.2197 0l1.4995-1.1321 2.4626-1.8636 5.006-3.7472.0125-.01a6.0682 6.0682 0 0 0 2.0026-7.003z"/></svg>
+            GitLab
+          </a>
+          <a style="--pill:#0a66c2" href="https://www.linkedin.com/in/stanislasp/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          <a style="--pill:#9146ff" href="https://twitch.tv/zairakai" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+            Twitch
+          </a>
+          <a style="--pill:#43e55e" href="https://linktr.ee/Zairakai" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.59 13.41c.41.39.41 1.03 0 1.42-.39.41-1.03.41-1.42 0a5.003 5.003 0 0 1 0-7.07l3.54-3.54a5.003 5.003 0 0 1 7.07 0 5.003 5.003 0 0 1 0 7.07l-1.49 1.49c.01-.82-.12-1.64-.4-2.42l.47-.48a2.982 2.982 0 0 0 0-4.24 2.982 2.982 0 0 0-4.24 0l-3.53 3.53a2.982 2.982 0 0 0 0 4.24zm2.82-4.24c.39-.41 1.03-.41 1.42 0a5.003 5.003 0 0 1 0 7.07l-3.54 3.54a5.003 5.003 0 0 1-7.07 0 5.003 5.003 0 0 1 0-7.07l1.49-1.49c-.01.82.12 1.64.4 2.43l-.47.47a2.982 2.982 0 0 0 0 4.24 2.982 2.982 0 0 0 4.24 0l3.53-3.53a2.982 2.982 0 0 0 0-4.24.973.973 0 0 1 0-1.42z"/></svg>
+            Linktree
+          </a>
+          <a style="--pill:#ff5a5f" href="https://pots.lydia.me/collect/pots?id=18363-dons-stream" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.001 4.529c2.349-2.532 6.15-2.522 8.489.021 2.34 2.545 2.34 6.674 0 9.218-2.34 2.545-8.489 6.514-8.489 6.514s-6.15-3.97-8.49-6.514c-2.34-2.544-2.34-6.673 0-9.218 2.34-2.545 6.14-2.553 8.49-.021z"/></svg>
+            Support the stream
+          </a>
+        </div>
+      </footer>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
