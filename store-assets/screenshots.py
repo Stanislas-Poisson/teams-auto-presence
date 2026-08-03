@@ -18,9 +18,16 @@ Requires: pip install playwright && playwright install chromium
 import json
 from pathlib import Path
 
+from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).parent.parent
+
+LIGHT_BG = (248, 248, 251)
+DARK_SLATE = (23, 23, 30)
+SLATE = (139, 143, 156)
+CARD_BG = (17, 18, 24)
+FONT_DIR = Path("/usr/share/fonts/truetype/dejavu")
 
 EXAMPLE_STORE = {
     "config": {
@@ -76,6 +83,68 @@ def capture(page, relative_path: str, out_name: str, *, viewport, selector=None)
     print(f"wrote {out_path}")
 
 
+def _font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
+    name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
+    return ImageFont.truetype(str(FONT_DIR / name), size)
+
+
+def _centered_text(draw, cx, y, text, f, fill):
+    bbox = draw.textbbox((0, 0), text, font=f)
+    w = bbox[2] - bbox[0]
+    draw.text((cx - w / 2, y), text, font=f, fill=fill)
+
+
+def compose_listing_screenshot(source_name: str, out_name: str, title: str, subtitle: str) -> None:
+    """
+    The raw UI screenshots (options/popup) are whatever aspect ratio their
+    real content is - nowhere near the Chrome Web Store's required
+    1280x800 / 640x400 screenshot canvas. This composes each onto a
+    branded 1280x800 canvas instead, matching the schedule concept
+    screenshot from generate.py, so all listing screenshots look like one
+    consistent set.
+    """
+    w, h = 1280, 800
+    canvas = Image.new("RGB", (w, h), LIGHT_BG)
+    draw = ImageDraw.Draw(canvas)
+
+    _centered_text(draw, w / 2, 44, title, _font(32, bold=True), DARK_SLATE)
+    _centered_text(draw, w / 2, 88, subtitle, _font(18), SLATE)
+
+    shot = Image.open(ROOT / "store-assets" / source_name).convert("RGB")
+    max_w, max_h = 980, 600
+    ratio = min(max_w / shot.width, max_h / shot.height, 1.0)
+    resized = shot.resize((int(shot.width * ratio), int(shot.height * ratio)), Image.LANCZOS)
+
+    pad = 16
+    card_w, card_h = resized.width + pad * 2, resized.height + pad * 2
+    card_x = (w - card_w) // 2
+    card_y = 150
+    draw.rounded_rectangle(
+        [card_x, card_y, card_x + card_w, card_y + card_h], radius=18, fill=CARD_BG
+    )
+    canvas.paste(resized, (card_x + pad, card_y + pad))
+
+    out_path = ROOT / "store-assets" / out_name
+    canvas.save(out_path)
+    print(f"wrote {out_path}")
+
+
+def build_store_icon() -> None:
+    """
+    icons/icon128.png has transparent rounded corners (fine for a browser
+    toolbar icon) - but the Chrome Web Store's "Store icon" upload
+    rejects images with an alpha channel. Flattened onto a white
+    background for that one upload slot; the extension's own icon files
+    are untouched.
+    """
+    icon = Image.open(ROOT / "icons" / "icon128.png").convert("RGBA")
+    flat = Image.new("RGB", icon.size, (255, 255, 255))
+    flat.paste(icon, (0, 0), icon)
+    out_path = ROOT / "store-assets" / "store_icon_128.png"
+    flat.save(out_path)
+    print(f"wrote {out_path}")
+
+
 def main() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -85,6 +154,16 @@ def main() -> None:
         capture(page, "popup.html", "screenshot_popup.png", viewport={"width": 360, "height": 700}, selector=".page")
 
         browser.close()
+
+    compose_listing_screenshot(
+        "screenshot_options.png", "screenshot_options_listing.png",
+        "Configure your schedule", "Work hours, lunch break, and target statuses",
+    )
+    compose_listing_screenshot(
+        "screenshot_popup.png", "screenshot_popup_listing.png",
+        "Live status at a glance", "Resume automation or toggle debug mode anytime",
+    )
+    build_store_icon()
 
 
 if __name__ == "__main__":
