@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Packages the extension into dist/teams-auto-presence-vX.Y.Z.zip,
+# Packages the extension into dist/teams-auto-presence-X.Y.Z.zip,
 # ready for "Load unpacked" sideload or Chrome Web Store upload.
 set -euo pipefail
 
@@ -7,7 +7,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 version=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
 out_dir="dist"
-out_zip="${out_dir}/teams-auto-presence-v${version}.zip"
+out_zip="${out_dir}/teams-auto-presence-${version}.zip"
 
 mkdir -p "$out_dir"
 rm -f "$out_zip"
