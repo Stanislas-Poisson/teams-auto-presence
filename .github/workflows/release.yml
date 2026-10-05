@@ -1,0 +1,95 @@
+name: Release
+
+# A tag X.Y.Z (or X.Y.Z-prerelease) on main publishes the release: the zip of the
+# extension and its checksum, with the notes generated from the pull requests.
+on:
+  push:
+    tags: ['*']
+
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  VERSION_TAG_REGEX: ${{ vars.VERSION_TAG_REGEX }}
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the format of the tag
+        run: |
+          if [ -z "$VERSION_TAG_REGEX" ]; then
+            echo "::error::The variable VERSION_TAG_REGEX of the repository is not set."
+            exit 1
+          fi
+          if ! printf '%s\n' "$GITHUB_REF_NAME" | grep -Eq "$VERSION_TAG_REGEX"; then
+            echo "::error::The tag $GITHUB_REF_NAME does not match $VERSION_TAG_REGEX (X.Y.Z or X.Y.Z-prerelease)."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag is on main
+        run: |
+          git fetch --quiet origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::The tag $GITHUB_REF_NAME is not on main: a release is made from main only."
+            exit 1
+          fi
+
+      - name: Check the CI passed on the tagged commit
+        run: |
+          for attempt in $(seq 1 40); do
+            conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?per_page=100" \
+              --jq '[.check_runs[] | select(.name == "ci")] | first | .conclusion // "missing"')
+
+            case "$conclusion" in
+              success) echo "The CI passed."; exit 0 ;;
+              missing|null) echo "The CI has not finished ($attempt/40), waiting." ;;
+              *) echo "::error::The CI of $GITHUB_SHA ended with: $conclusion."; exit 1 ;;
+            esac
+
+            sleep 30
+          done
+
+          echo "::error::The CI of $GITHUB_SHA did not finish in 20 minutes."
+          exit 1
+
+      - name: Check the tag matches manifest.json
+        run: |
+          # A pre-release tag (1.2.0-rc.1) has the version of the manifest (1.2.0)
+          TAG_VERSION="${GITHUB_REF_NAME%%-*}"
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+
+          if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::The tag version ($TAG_VERSION) does not match the version of manifest.json ($MANIFEST_VERSION)."
+            exit 1
+          fi
+
+      - name: Build the zip
+        run: bash build.sh
+
+      - name: Compute the SHA-256 checksum
+        run: |
+          ZIP_FILE=$(ls dist/*.zip | head -n 1)
+          sha256sum "$ZIP_FILE" > "${ZIP_FILE}.sha256"
+          echo "SHA-256 generated for $ZIP_FILE"
+
+      - name: Create the release
+        run: |
+          flags=(--latest)
+          if [[ $GITHUB_REF_NAME == *-* ]]; then
+            flags=(--prerelease --latest=false)
+          fi
+
+          gh release create "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --title "${GITHUB_REPOSITORY#*/} $GITHUB_REF_NAME" \
+            --generate-notes \
+            "${flags[@]}" \
+            dist/*.zip dist/*.sha256
