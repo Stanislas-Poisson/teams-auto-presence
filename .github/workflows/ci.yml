@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-manifest:
+    name: Validate Manifest & Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate manifest.json format
+        run: jq . manifest.json > /dev/null
+
+      - name: Check manifest version matches CHANGELOG.md
+        run: |
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+          CHANGELOG_VERSION=$(grep -m 1 -E '^## [0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | sed -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+
+          if [ "$MANIFEST_VERSION" != "$CHANGELOG_VERSION" ]; then
+            echo "Error: manifest.json version ($MANIFEST_VERSION) does not match CHANGELOG.md version ($CHANGELOG_VERSION)"
+            exit 1
+          fi
+          echo "Version match confirmed: $MANIFEST_VERSION"
+
+  build-check:
+    name: ShellCheck & Build Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck on build.sh
+        run: shellcheck build.sh
+
+      - name: Execute build.sh
+        run: bash build.sh
+
+      - name: Verify build zip contents
+        run: |
+          ZIP_FILE=$(ls dist/*.zip 2>/dev/null | head -n 1)
+          if [ -z "$ZIP_FILE" ]; then
+            echo "Error: No zip file produced by build.sh"
+            exit 1
+          fi
+
+          echo "Checking contents of $ZIP_FILE..."
+          ZIP_CONTENTS=$(unzip -l "$ZIP_FILE")
+
+          REQUIRED_FILES=("manifest.json" "LICENSE")
+          for file in "${REQUIRED_FILES[@]}"; do
+            if ! echo "$ZIP_CONTENTS" | grep -q "$file"; then
+              echo "Error: Missing required file '$file' in $ZIP_FILE"
+              exit 1
+            fi
+          done
+          echo "All required files present in zip archive."
+
+  # The check that the branch protection requires. It runs even when a job
+  # fails, and fails with it: a skipped job would count as a success.
+  ci:
+    name: ci
+    needs: [validate-manifest, build-check]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Every job passed
+        run: |
+          echo '${{ toJSON(needs) }}'
+          test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "false"
