@@ -19,6 +19,8 @@ const pauseBannerEl  = document.getElementById('pauseBanner');
 const resumeBtn      = document.getElementById('resume');
 const debugEl        = document.getElementById('debug');
 const statusEl       = document.getElementById('status');
+const accessBannerEl = document.getElementById('accessBanner');
+const grantAccessBtn = document.getElementById('grantAccess');
 
 function statusLabel(key) {
   return key ? (STATUS_LABELS[key] || key) : '-';
@@ -45,7 +47,27 @@ function load() {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
-  if (changes.runtimeState || changes.debug) load();
+  if (changes.runtimeState || changes.debug) // Chromium grants the host permissions when the extension is installed. Firefox (Manifest V3)
+// leaves them to the user: say so, and ask with a click (the browser needs a user gesture).
+function checkAccess() {
+  chrome.permissions.contains({ origins: TEAMS_URLS }, (granted) => {
+    accessBannerEl.classList.toggle('visible', !granted);
+  });
+}
+
+grantAccessBtn.addEventListener('click', () => {
+  chrome.permissions.request({ origins: TEAMS_URLS }, (granted) => {
+    accessBannerEl.classList.toggle('visible', !granted);
+
+    if (granted) {
+      statusEl.textContent = 'Access granted: reload your Teams tab.';
+      setTimeout(() => { statusEl.textContent = ''; }, 4000);
+    }
+  });
+});
+
+checkAccess();
+load();
 });
 
 debugEl.addEventListener('change', () => {
@@ -70,4 +92,24 @@ document.getElementById('openOptions').addEventListener('click', () => {
   chrome.runtime.openOptionsPage();
 });
 
+// Chromium grants the host permissions when the extension is installed. Firefox (Manifest V3)
+// leaves them to the user: say so, and ask with a click (the browser needs a user gesture).
+function checkAccess() {
+  chrome.permissions.contains({ origins: TEAMS_URLS }, (granted) => {
+    accessBannerEl.classList.toggle('visible', !granted);
+  });
+}
+
+grantAccessBtn.addEventListener('click', () => {
+  chrome.permissions.request({ origins: TEAMS_URLS }, (granted) => {
+    accessBannerEl.classList.toggle('visible', !granted);
+
+    if (granted) {
+      statusEl.textContent = 'Access granted: reload your Teams tab.';
+      setTimeout(() => { statusEl.textContent = ''; }, 4000);
+    }
+  });
+});
+
+checkAccess();
 load();

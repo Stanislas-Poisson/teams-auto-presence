@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0 - 2026-10-06
+
+- The CI checks both zips (and that only the Firefox one carries the add-on id), lints the Firefox package with web-ext, and the release writes one checksum per zip.
+
+- Firefox: `build.sh` makes a Firefox zip (`teams-auto-presence-X.Y.Z-firefox.zip`)
+  next to the Chromium one, from the same sources, with the add-on id, the minimum
+  version (142) and the data collection declaration (none) added to the manifest
+  (`manifest.firefox.json`). The package passes `web-ext lint` without a warning.
+- The popup asks for the permission to work on Teams when the browser has not
+  granted it (Firefox leaves the host permissions to the user).
+- The options page is declared with `options_ui` (opens in a tab), understood by
+  Chromium and Firefox. The status list of the options page is built with the DOM
+  instead of `innerHTML`.
+- README: install steps for Edge, Opera, Brave and Firefox.
+
 ## 1.0.0 - 2026-08-03
 
 - Initial release: Manifest V3 extension that automatically switches

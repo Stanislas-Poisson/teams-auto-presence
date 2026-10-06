@@ -34,7 +34,7 @@ const els = {
 };
 
 for (const select of [els.statusDuringWork, els.statusDuringLunch, els.statusAfterWork]) {
-  select.innerHTML = STATUS_OPTIONS.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+  select.replaceChildren(...STATUS_OPTIONS.map(o => new Option(o.label, o.value)));
 }
 
 function fmtHM(t) {
