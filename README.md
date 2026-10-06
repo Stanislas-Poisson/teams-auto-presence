@@ -203,6 +203,10 @@ Microsoft's own presence API).
 
 See [CHANGELOG.md](CHANGELOG.md).
 
+## Statistics
+
+![Statistics of teams-auto-presence][stats-card]
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
@@ -229,3 +233,5 @@ code and games with the chat.*
 [![Support the stream](https://img.shields.io/badge/Support-the_stream-FF5A5F?style=flat-square)](https://pots.lydia.me/collect/pots?id=18363-dons-stream)
 
 </div>
+
+[stats-card]: https://raw.githubusercontent.com/Stanislas-Poisson/Stanislas-Poisson/main/assets/projects/teams-auto-presence.svg
