@@ -46,23 +46,41 @@ jobs:
 
       - name: Verify build zip contents
         run: |
-          ZIP_FILE=$(ls dist/*.zip 2>/dev/null | head -n 1)
-          if [ -z "$ZIP_FILE" ]; then
-            echo "Error: No zip file produced by build.sh"
+          shopt -s nullglob
+          ZIPS=(dist/*.zip)
+
+          if [ "${#ZIPS[@]}" -ne 2 ]; then
+            echo "Error: expected 2 zips (Chromium and Firefox), found ${#ZIPS[@]}"
             exit 1
           fi
 
-          echo "Checking contents of $ZIP_FILE..."
-          ZIP_CONTENTS=$(unzip -l "$ZIP_FILE")
+          for ZIP_FILE in "${ZIPS[@]}"; do
+            echo "Checking contents of $ZIP_FILE..."
+            ZIP_CONTENTS=$(unzip -l "$ZIP_FILE")
 
-          REQUIRED_FILES=("manifest.json" "LICENSE")
-          for file in "${REQUIRED_FILES[@]}"; do
-            if ! echo "$ZIP_CONTENTS" | grep -q "$file"; then
-              echo "Error: Missing required file '$file' in $ZIP_FILE"
-              exit 1
-            fi
+            for file in manifest.json LICENSE; do
+              if ! echo "$ZIP_CONTENTS" | grep -q "$file"; then
+                echo "Error: Missing required file '$file' in $ZIP_FILE"
+                exit 1
+              fi
+            done
           done
-          echo "All required files present in zip archive."
+
+          # Only the Firefox zip carries the add-on id.
+          for ZIP_FILE in "${ZIPS[@]}"; do
+            HAS_GECKO=$(unzip -p "$ZIP_FILE" manifest.json | jq 'has("browser_specific_settings")')
+            case "$ZIP_FILE" in
+              *-firefox.zip) test "$HAS_GECKO" = "true" ;;
+              *) test "$HAS_GECKO" = "false" ;;
+            esac
+          done
+          echo "All required files present in the zip archives."
+
+      - name: Lint the Firefox package
+        run: |
+          mkdir firefox-package
+          unzip -q dist/*-firefox.zip -d firefox-package
+          npx --yes web-ext@latest lint --source-dir firefox-package --warnings-as-errors
 
   # The check that the branch protection requires. It runs even when a job
   # fails, and fails with it: a skipped job would count as a success.

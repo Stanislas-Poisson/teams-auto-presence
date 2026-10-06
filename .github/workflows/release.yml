@@ -74,11 +74,12 @@ jobs:
       - name: Build the zip
         run: bash build.sh
 
-      - name: Compute the SHA-256 checksum
+      - name: Compute the SHA-256 checksums
         run: |
-          ZIP_FILE=$(ls dist/*.zip | head -n 1)
-          sha256sum "$ZIP_FILE" > "${ZIP_FILE}.sha256"
-          echo "SHA-256 generated for $ZIP_FILE"
+          for ZIP_FILE in dist/*.zip; do
+            sha256sum "$ZIP_FILE" > "${ZIP_FILE}.sha256"
+            echo "SHA-256 generated for $ZIP_FILE"
+          done
 
       - name: Create the release
         run: |
