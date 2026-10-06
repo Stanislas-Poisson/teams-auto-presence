@@ -43,7 +43,35 @@ lunch break, end of day, weekend.
 ```
 
 Then follow the "Load unpacked" steps above, pointing at the unzipped
-folder in `dist/`.
+folder in `dist/`. `build.sh` makes two zips from the same sources: the
+Chromium one (`teams-auto-presence-X.Y.Z.zip`) and the Firefox one
+(`teams-auto-presence-X.Y.Z-firefox.zip`, the same files with the add-on id,
+the minimum version and the data collection declaration added to the manifest).
+
+</details>
+
+<details>
+<summary>Microsoft Edge, Opera, Brave (Chromium)</summary>
+
+They run the Chromium zip as it is: open `edge://extensions`,
+`opera://extensions` or `brave://extensions`, enable **Developer mode** and
+use **Load unpacked** on the unzipped Chromium zip.
+
+</details>
+
+<details>
+<summary>Firefox (version 142 or later)</summary>
+
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on** and pick `manifest.json` of the unzipped
+   Firefox zip (a temporary add-on is removed when Firefox closes; a listed or
+   signed add-on stays).
+3. Firefox does not grant the permission to work on Teams at install. Open the
+   popup of the extension and click **Allow access to Teams**, then reload your
+   Teams tab. (Or in `about:addons` > the extension > **Permissions**.)
+
+The `"world": "MAIN"` content script needs Firefox 128 and the data collection
+declaration needs 140 (142 on Android): the Firefox package asks for 142.
 
 </details>
 

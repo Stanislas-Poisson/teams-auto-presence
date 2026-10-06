@@ -78,6 +78,32 @@
       .pause-banner.visible {
         display: block;
       }
+      .access-banner {
+        display: none;
+        background: rgba(98, 100, 167, 0.14);
+        border: 1px solid rgba(98, 100, 167, 0.5);
+        border-radius: 8px;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.78rem;
+        margin-bottom: 0.7rem;
+        line-height: 1.4;
+      }
+      .access-banner.visible {
+        display: block;
+      }
+      .access-banner button {
+        margin-top: 0.45rem;
+        font: inherit;
+        color: var(--text);
+        background: var(--accent);
+        border: 0;
+        border-radius: 6px;
+        padding: 0.35rem 0.7rem;
+        cursor: pointer;
+      }
+      .access-banner button:hover {
+        background: var(--accent-hover);
+      }
       .dot {
         display: inline-block;
         width: 0.55rem;
@@ -208,6 +234,12 @@
         <h1>Teams Auto Presence</h1>
       </div>
 
+      <div id="accessBanner" class="access-banner" role="status">
+        Teams Auto Presence needs your permission to work on Teams (Firefox asks for it
+        instead of granting it at install).
+        <br />
+        <button type="button" id="grantAccess">Allow access to Teams</button>
+      </div>
       <div id="pauseBanner" class="pause-banner">
         Paused (manual change detected). Will resume automatically at the
         next schedule change, or right away with the button below.
