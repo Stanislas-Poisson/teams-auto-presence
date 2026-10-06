@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 - 2026-10-06
+
+- The CI checks both zips (and that only the Firefox one carries the add-on id), lints the Firefox package with web-ext, and the release writes one checksum per zip.
 
 - Firefox: `build.sh` makes a Firefox zip (`teams-auto-presence-X.Y.Z-firefox.zip`)
   next to the Chromium one, from the same sources, with the add-on id, the minimum
