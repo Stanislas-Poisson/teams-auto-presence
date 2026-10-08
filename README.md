@@ -8,6 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/manifest-v3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](manifest.json)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-available-34A853?style=flat-square&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/teams-auto-presence/ccecckoeekjnndicanahkpoblpgdocel)
 
 </div>
 
@@ -26,7 +27,10 @@ lunch break, end of day, weekend.
 
 ## Install
 
-<details open>
+[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/teams-auto-presence/ccecckoeekjnndicanahkpoblpgdocel)
+(the badge above links there too).
+
+<details>
 <summary>From source ("Load unpacked")</summary>
 
 1. Go to `chrome://extensions`.
