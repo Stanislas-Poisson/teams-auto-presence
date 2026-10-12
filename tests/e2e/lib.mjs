@@ -206,8 +206,21 @@ async function launchOnce(browser, { dir, zip }) {
     builder.forBrowser(Browser.CHROME).setChromeOptions(options);
   }
   const driver = await builder.build();
+  const base = `chrome-extension://${chromiumId(dir)}/`;
+
+  // The renderer of a freshly started Chromium can be stuck on its first page, mostly Edge on a runner.
+  // The first page is loaded here, with a short limit, so that the caller starts the browser again if it fails.
+  try {
+    await driver.manage().setTimeouts({ pageLoad: 30_000, script: 30_000 });
+    await driver.get(`${base}options.html`);
+    await driver.executeScript('return document.readyState');
+  } catch (error) {
+    await driver.quit().catch(() => {});
+    throw error;
+  }
+
   await driver.manage().setTimeouts({ pageLoad: 60_000, script: 60_000 });
-  return { driver, base: `chrome-extension://${chromiumId(dir)}/` };
+  return { driver, base };
 }
 
 // Opens a page of the extension in a new tab, selects it and returns its handle. Marionette refuses
@@ -246,7 +259,7 @@ export async function openPage(driver, browser, url) {
 }
 
 // A browser sometimes does not start on a busy runner: each attempt has a time limit and a new one follows.
-export async function launch(browser, options, { attempts = 3, timeout = 60_000 } = {}) {
+export async function launch(browser, options, { attempts = 3, timeout = 90_000 } = {}) {
   for (let attempt = 1; ; attempt += 1) {
     console.log(`[e2e] starting ${browser} (attempt ${attempt}/${attempts})`);
     const started = launchOnce(browser, options);
