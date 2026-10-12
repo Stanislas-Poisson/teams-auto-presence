@@ -47,27 +47,7 @@ function load() {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
-  if (changes.runtimeState || changes.debug) // Chromium grants the host permissions when the extension is installed. Firefox (Manifest V3)
-// leaves them to the user: say so, and ask with a click (the browser needs a user gesture).
-function checkAccess() {
-  chrome.permissions.contains({ origins: TEAMS_URLS }, (granted) => {
-    accessBannerEl.classList.toggle('visible', !granted);
-  });
-}
-
-grantAccessBtn.addEventListener('click', () => {
-  chrome.permissions.request({ origins: TEAMS_URLS }, (granted) => {
-    accessBannerEl.classList.toggle('visible', !granted);
-
-    if (granted) {
-      statusEl.textContent = 'Access granted: reload your Teams tab.';
-      setTimeout(() => { statusEl.textContent = ''; }, 4000);
-    }
-  });
-});
-
-checkAccess();
-load();
+  if (changes.runtimeState || changes.debug) load();
 });
 
 debugEl.addEventListener('change', () => {
