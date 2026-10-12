@@ -214,9 +214,21 @@ async function launchOnce(browser, { dir, zip }) {
 // to navigate to a moz-extension address, so Firefox opens the tab from its own interface.
 export async function openPage(driver, browser, url) {
   if (browser !== 'firefox') {
-    await driver.switchTo().newWindow('tab');
-    await driver.get(url);
-    return driver.getWindowHandle();
+    // The first page of a freshly started Chromium can be slow to load: a tab that times out is closed and replaced.
+    for (let attempt = 1; ; attempt += 1) {
+      const previous = await driver.getWindowHandle();
+      await driver.switchTo().newWindow('tab');
+      const handle = await driver.getWindowHandle();
+      try {
+        await driver.get(url);
+        return handle;
+      } catch (error) {
+        console.log(`[e2e] ${url} did not load (attempt ${attempt}/3): ${error.message}`);
+        await driver.close().catch(() => {});
+        await driver.switchTo().window(previous);
+        if (attempt >= 3) throw error;
+      }
+    }
   }
 
   const known = await driver.getAllWindowHandles();
