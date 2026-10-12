@@ -105,7 +105,7 @@ Firefox: the host permissions are granted by the user. Open the popup and click 
 | Small promo tile | `store-assets/small_promo_tile.png` | 440x280 | Chrome, Edge (optional) |
 | Marquee promo tile | `store-assets/marquee_promo.png` | 1400x560 | Chrome, Edge (optional) |
 
-`store_icon_128.png` is the 128x128 icon without transparency, for the forms that refuse an alpha channel. The images are made by `generate.py` and `screenshots.py`. `store_logo_300.png` is the icon scaled up to 300x300: redraw it from a vector source when there is one.
+`store_icon_128.png` is the 128x128 icon without transparency, for the forms that refuse an alpha channel. The logo and the promo images are SVG files in `store-assets/svg/`, rendered to PNG by `render.py`. The screenshots of the real popup and options page come from `screenshots.py`.
 
 ## Stores
 
