@@ -189,6 +189,9 @@
     }
   });
 
+  // The isolated script may have sent the config before this listener existed: ask for it again.
+  window.postMessage({ ns: NS, type: 'ready' }, window.location.origin);
+
   /* ==============================
    * FETCH INTERCEPTOR
    * Captures auth headers on any Teams request.

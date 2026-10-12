@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2 - 2026-10-12
+
+- Fix: the configuration could be lost when the MAIN script loaded after the isolated one (seen on Firefox): the schedule ran with the default configuration. The MAIN script now asks for the configuration when it is ready.
+- The CI loads the packages in Chrome, Edge and Firefox and plays the flow against a fake Teams page (`tests/e2e`).
+
 ## 1.1.1 - 2026-10-12
 
 - Fix: the popup registered one more click listener on the access button at each state change (a block was pasted inside the storage listener). Each click sent one permission request per listener.

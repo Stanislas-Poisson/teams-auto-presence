@@ -82,11 +82,38 @@ jobs:
           unzip -q dist/*-firefox.zip -d firefox-package
           npx --yes web-ext@latest lint --source-dir firefox-package --warnings-as-errors
 
+  # The packages are loaded in the real browsers of the runner and play the flow against a fake Teams
+  # page. See tests/e2e.
+  e2e:
+    name: Browser test (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, edge, firefox]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install the test dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Build the packages
+        run: bash build.sh
+
+      - name: Run the tests in ${{ matrix.browser }}
+        working-directory: tests/e2e
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: npm test
+
   # The check that the branch protection requires. It runs even when a job
   # fails, and fails with it: a skipped job would count as a success.
   ci:
     name: ci
-    needs: [validate-manifest, build-check]
+    needs: [validate-manifest, build-check, e2e]
     runs-on: ubuntu-latest
     if: always()
     steps:
