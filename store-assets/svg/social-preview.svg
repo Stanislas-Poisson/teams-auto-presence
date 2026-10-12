@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" font-family="'DejaVu Sans', Verdana, Arial, sans-serif">
+  <defs>
+    <linearGradient id="pbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FBFBFE"/>
+      <stop offset="1" stop-color="#E9E9F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#pbg)"/>
+  <!-- Large faded clock ring as a background mark -->
+  <circle cx="1190" cy="77" r="397" fill="none" stroke="#6264A7" stroke-opacity="0.07" stroke-width="77"/>
+  <svg x="96" y="180" width="280" height="280" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6D6FB8"/>
+      <stop offset="1" stop-color="#3F4079"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#lg)"/>
+  <!-- Clock ring: one arc per slot of the day (work, lunch, work, outside hours) -->
+  <g>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#E8566F" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="54.93 139.85" stroke-dashoffset="-1.75" transform="rotate(-163 58 62)"/>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#FFB454" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="23.76 171.02" stroke-dashoffset="-60.19" transform="rotate(-163 58 62)"/>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#E8566F" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="54.93 139.85" stroke-dashoffset="-87.46" transform="rotate(-163 58 62)"/>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#C9C8E6" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="47.14 147.64" stroke-dashoffset="-145.89" transform="rotate(-163 58 62)"/>
+  </g>
+  <!-- Hands at ten past ten -->
+  <g stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" fill="none">
+    <line x1="58" y1="62" x2="47.0" y2="49.0"/>
+    <line x1="58" y1="62" x2="75.0" y2="52.0"/>
+  </g>
+  <circle cx="58" cy="62" r="4.5" fill="#FFFFFF"/>
+  <!-- Presence badge -->
+  <circle cx="95" cy="96" r="21" fill="#3F4079"/>
+  <circle cx="95" cy="96" r="15" fill="#3DDC84"/>
+  <path d="M88.5 96.5l4.6 4.6 8.6-9.4" fill="none" stroke="#FFFFFF" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+  <text x="440" y="297" font-size="54" font-weight="700" fill="#17171E">Teams Auto Presence</text>
+  <text x="440" y="341" font-size="26" fill="#6B6E80">Your Teams status, on a schedule.</text>
+  <rect x="440.0" y="361.6" width="120.0" height="24" rx="12.0" fill="#C9C8E6"/>
+  <rect x="563.0" y="361.6" width="192.0" height="24" rx="12.0" fill="#E8566F"/>
+  <rect x="758.0" y="361.6" width="108.0" height="24" rx="12.0" fill="#FFB454"/>
+  <rect x="869.0" y="361.6" width="192.0" height="24" rx="12.0" fill="#E8566F"/>
+  <rect x="1064.0" y="361.6" width="120.0" height="24" rx="12.0" fill="#C9C8E6"/>
+</svg>
