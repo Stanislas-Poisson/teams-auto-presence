@@ -59,7 +59,14 @@
   window.addEventListener('message', (event) => {
     if (event.source !== window) return;
     const msg = event.data;
-    if (!msg || msg.ns !== NS || msg.type !== 'state') return;
+    if (!msg || msg.ns !== NS) return;
+
+    // The MAIN script listens from its own load, which can come after the first broadcast above.
+    if (msg.type === 'ready') {
+      broadcastConfig();
+      return;
+    }
+    if (msg.type !== 'state') return;
     chrome.storage.local.set({ runtimeState: msg.payload });
   });
 

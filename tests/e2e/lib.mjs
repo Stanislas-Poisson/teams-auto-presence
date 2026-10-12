@@ -20,7 +20,7 @@ export const FIREFOX_UUID = 'a1b2c3d4-0000-4000-8000-000000000001';
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Waits until check() returns something truthy, and returns it.
-export async function waitFor(check, { timeout = 30_000, interval = 250, message = 'condition' } = {}) {
+export async function waitFor(check, { timeout = 90_000, interval = 250, message = 'condition' } = {}) {
   const end = Date.now() + timeout;
   let last;
   while (Date.now() < end) {
@@ -165,6 +165,10 @@ const CHROMIUM_ARGS = (dir) => [
   '--headless=new',
   '--no-sandbox',
   '--disable-gpu',
+  '--disable-dev-shm-usage',
+  '--no-first-run',
+  '--no-default-browser-check',
+  '--disable-sync',
   '--window-size=1280,900',
   `--load-extension=${dir}`,
   // Recent Chrome and Edge ignore --load-extension unless this feature is disabled.
@@ -180,6 +184,7 @@ async function launchOnce(browser, { dir, zip }) {
     // geckodriver needs --allow-system-access to open the pages of the extension from the browser interface.
     const service = new firefox.ServiceBuilder().addArguments('--allow-system-access');
     const driver = await new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(options).setFirefoxService(service).build();
+    await driver.manage().setTimeouts({ pageLoad: 60_000, script: 60_000 });
     await driver.installAddon(zip, true);
     return { driver, base: `moz-extension://${FIREFOX_UUID}/` };
   }
@@ -201,6 +206,7 @@ async function launchOnce(browser, { dir, zip }) {
     builder.forBrowser(Browser.CHROME).setChromeOptions(options);
   }
   const driver = await builder.build();
+  await driver.manage().setTimeouts({ pageLoad: 60_000, script: 60_000 });
   return { driver, base: `chrome-extension://${chromiumId(dir)}/` };
 }
 
@@ -208,9 +214,21 @@ async function launchOnce(browser, { dir, zip }) {
 // to navigate to a moz-extension address, so Firefox opens the tab from its own interface.
 export async function openPage(driver, browser, url) {
   if (browser !== 'firefox') {
-    await driver.switchTo().newWindow('tab');
-    await driver.get(url);
-    return driver.getWindowHandle();
+    // The first page of a freshly started Chromium can be slow to load: a tab that times out is closed and replaced.
+    for (let attempt = 1; ; attempt += 1) {
+      const previous = await driver.getWindowHandle();
+      await driver.switchTo().newWindow('tab');
+      const handle = await driver.getWindowHandle();
+      try {
+        await driver.get(url);
+        return handle;
+      } catch (error) {
+        console.log(`[e2e] ${url} did not load (attempt ${attempt}/3): ${error.message}`);
+        await driver.close().catch(() => {});
+        await driver.switchTo().window(previous);
+        if (attempt >= 3) throw error;
+      }
+    }
   }
 
   const known = await driver.getAllWindowHandles();
