@@ -37,10 +37,13 @@ The test uses the zips of `dist/` (it builds them when they are missing). For th
 
 The zip is written in `dist/`, named after the version in `manifest.json`.
 
-## Icons
+## Icons and store images
 
-The icons are generated with Python and Pillow. Run this only if you change the design:
+The logo and the promo images are SVG files in `store-assets/svg/`. Run this only if you change the design:
 
 ```sh
-python3 icons/generate.py
+pip install cairosvg pillow
+python3 store-assets/render.py
 ```
+
+It writes `icons/icon16.png`, `icon48.png` and `icon128.png` and the PNG files of `store-assets/`. The screenshots of the real popup and options page come from `store-assets/screenshots.py` (Playwright): run it after a change of the logo or of the pages.
