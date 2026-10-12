@@ -172,7 +172,7 @@ const CHROMIUM_ARGS = (dir) => [
 ];
 
 // Starts the browser with the extension loaded, and returns the driver and the base URL of its pages.
-export async function launch(browser, { dir, zip }) {
+async function launchOnce(browser, { dir, zip }) {
   if (browser === 'firefox') {
     const options = new firefox.Options()
       .addArguments('-headless')
@@ -225,4 +225,28 @@ export async function openPage(driver, browser, url) {
   const handle = await waitFor(async () => (await driver.getAllWindowHandles()).find((h) => !known.includes(h)), { message: 'the new tab' });
   await driver.switchTo().window(handle);
   return handle;
+}
+
+// A browser sometimes does not start on a busy runner: each attempt has a time limit and a new one follows.
+export async function launch(browser, options, { attempts = 3, timeout = 60_000 } = {}) {
+  for (let attempt = 1; ; attempt += 1) {
+    console.log(`[e2e] starting ${browser} (attempt ${attempt}/${attempts})`);
+    const started = launchOnce(browser, options);
+    let timer;
+    try {
+      const result = await Promise.race([
+        started,
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`${browser} did not start in ${timeout / 1000}s`)), timeout); }),
+      ]);
+      console.log(`[e2e] ${browser} started`);
+      return result;
+    } catch (error) {
+      // A browser that starts late is closed.
+      started.then(({ driver }) => driver.quit()).catch(() => {});
+      console.log(`[e2e] ${error.message}`);
+      if (attempt >= attempts) throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
 }

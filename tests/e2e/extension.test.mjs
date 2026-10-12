@@ -27,7 +27,7 @@ const storageSet = (driver, values) => driver.executeAsyncScript(`
 const text = async (driver, id) => (await driver.findElement(By.id(id)).getText()).trim();
 const hasClass = async (driver, id, name) => ((await driver.findElement(By.id(id)).getAttribute('class')) || '').split(/\s+/).includes(name);
 
-describe(`extension in ${browser}`, { timeout: 120_000 }, () => {
+describe(`extension in ${browser}`, { timeout: 300_000 }, () => {
   describe('install', () => {
     let driver;
     let base;
