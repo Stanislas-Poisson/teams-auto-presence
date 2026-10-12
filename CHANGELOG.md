@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3 - 2026-10-12
+
+- New logo, drawn as an SVG. The icons and the images of the store listings are rendered from the SVG sources in `store-assets/svg/` by `store-assets/render.py`, and the screenshots are made again with the new logo.
+
 ## 1.1.2 - 2026-10-12
 
 - Fix: the configuration could be lost when the MAIN script loaded after the isolated one (seen on Firefox): the schedule ran with the default configuration. The MAIN script now asks for the configuration when it is ready.

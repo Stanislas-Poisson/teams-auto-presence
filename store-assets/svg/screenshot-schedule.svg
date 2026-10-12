@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="'DejaVu Sans', Verdana, Arial, sans-serif">
+  <rect width="1280" height="800" fill="#F8F8FB"/>
+  <svg x="588" y="70" width="104" height="104" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6D6FB8"/>
+      <stop offset="1" stop-color="#3F4079"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#lg)"/>
+  <!-- Clock ring: one arc per slot of the day (work, lunch, work, outside hours) -->
+  <g>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#E8566F" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="54.93 139.85" stroke-dashoffset="-1.75" transform="rotate(-163 58 62)"/>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#FFB454" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="23.76 171.02" stroke-dashoffset="-60.19" transform="rotate(-163 58 62)"/>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#E8566F" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="54.93 139.85" stroke-dashoffset="-87.46" transform="rotate(-163 58 62)"/>
+    <circle cx="58" cy="62" r="31" fill="none" stroke="#C9C8E6" stroke-width="12.5" stroke-linecap="round" stroke-dasharray="47.14 147.64" stroke-dashoffset="-145.89" transform="rotate(-163 58 62)"/>
+  </g>
+  <!-- Hands at ten past ten -->
+  <g stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" fill="none">
+    <line x1="58" y1="62" x2="47.0" y2="49.0"/>
+    <line x1="58" y1="62" x2="75.0" y2="52.0"/>
+  </g>
+  <circle cx="58" cy="62" r="4.5" fill="#FFFFFF"/>
+  <!-- Presence badge -->
+  <circle cx="95" cy="96" r="21" fill="#3F4079"/>
+  <circle cx="95" cy="96" r="15" fill="#3DDC84"/>
+  <path d="M88.5 96.5l4.6 4.6 8.6-9.4" fill="none" stroke="#FFFFFF" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+  <text x="640" y="224" text-anchor="middle" font-size="44" font-weight="700" fill="#17171E">Teams Auto Presence</text>
+  <text x="640" y="266" text-anchor="middle" font-size="22" fill="#6B6E80">Your Teams status follows your day, not your idle time</text>
+  <rect x="100.0" y="350" width="172.3" height="120" rx="14" fill="#C9C8E6"/>
+  <text x="186.2" y="509.9" text-anchor="middle" font-size="19" font-weight="700" fill="#17171E">Outside hours</text>
+  <text x="186.2" y="538.4" text-anchor="middle" font-size="15.6" fill="#6B6E80">before 08:45</text>
+  <rect x="279.5" y="350" width="275.7" height="120" rx="14" fill="#E8566F"/>
+  <text x="417.4" y="509.9" text-anchor="middle" font-size="19" font-weight="700" fill="#17171E">Work</text>
+  <text x="417.4" y="538.4" text-anchor="middle" font-size="15.6" fill="#6B6E80">08:45 - 12:30</text>
+  <rect x="562.5" y="350" width="155.1" height="120" rx="14" fill="#FFB454"/>
+  <text x="640.0" y="509.9" text-anchor="middle" font-size="19" font-weight="700" fill="#17171E">Lunch</text>
+  <text x="640.0" y="538.4" text-anchor="middle" font-size="15.6" fill="#6B6E80">12:30 - 13:30</text>
+  <rect x="724.7" y="350" width="275.7" height="120" rx="14" fill="#E8566F"/>
+  <text x="862.6" y="509.9" text-anchor="middle" font-size="19" font-weight="700" fill="#17171E">Work</text>
+  <text x="862.6" y="538.4" text-anchor="middle" font-size="15.6" fill="#6B6E80">13:30 - 16:45</text>
+  <rect x="1007.7" y="350" width="172.3" height="120" rx="14" fill="#C9C8E6"/>
+  <text x="1093.8" y="509.9" text-anchor="middle" font-size="19" font-weight="700" fill="#17171E">Outside hours</text>
+  <text x="1093.8" y="538.4" text-anchor="middle" font-size="15.6" fill="#6B6E80">after 16:45</text>
+  <text x="640" y="660" text-anchor="middle" font-size="20" fill="#6B6E80">Set your hours and the status of each slot. It resumes by itself after a manual change.</text>
+</svg>
