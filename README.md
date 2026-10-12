@@ -167,23 +167,14 @@ flowchart LR
 - `build.sh` - zip packaging for sideload/CWS
 
 <details>
-<summary>Rebuilding the icons</summary>
+<summary>Rebuilding the icons and the store-assets visuals</summary>
 
-Icons are generated deterministically with Pillow, no external assets:
-
-```sh
-python3 icons/generate.py
-```
-
-</details>
-
-<details>
-<summary>Rebuilding the store-assets visuals</summary>
-
-Promotional images (Pillow, no external assets):
+The logo and the promotional images are SVG files in `store-assets/svg/`.
+One script renders them to the PNG files of `icons/` and `store-assets/`:
 
 ```sh
-python3 store-assets/generate.py
+pip install cairosvg pillow
+python3 store-assets/render.py
 ```
 
 Real screenshots of `options.html`/`popup.html` (Playwright, with a

@@ -3,7 +3,7 @@ Capture real screenshots of the extension's own UI (options.html,
 popup.html) for the README and the Chrome Web Store listing.
 
 Unlike devtools-resize-fix (no visible UI at all, hence hand-drawn mockups
-in generate.py), these pages are genuine HTML the extension ships - so
+in render.py), these pages are genuine HTML the extension ships - so
 real screenshots are both possible and more honest than a mockup. The
 catch: chrome.storage / chrome.runtime / chrome.tabs don't exist when a
 page is opened as a plain file:// URL (only inside a real extension
@@ -100,7 +100,7 @@ def compose_listing_screenshot(source_name: str, out_name: str, title: str, subt
     real content is - nowhere near the Chrome Web Store's required
     1280x800 / 640x400 screenshot canvas. This composes each onto a
     branded 1280x800 canvas instead, matching the schedule concept
-    screenshot from generate.py, so all listing screenshots look like one
+    screenshot from render.py, so all listing screenshots look like one
     consistent set.
     """
     w, h = 1280, 800
@@ -129,22 +129,6 @@ def compose_listing_screenshot(source_name: str, out_name: str, title: str, subt
     print(f"wrote {out_path}")
 
 
-def build_store_icon() -> None:
-    """
-    icons/icon128.png has transparent rounded corners (fine for a browser
-    toolbar icon) - but the Chrome Web Store's "Store icon" upload
-    rejects images with an alpha channel. Flattened onto a white
-    background for that one upload slot; the extension's own icon files
-    are untouched.
-    """
-    icon = Image.open(ROOT / "icons" / "icon128.png").convert("RGBA")
-    flat = Image.new("RGB", icon.size, (255, 255, 255))
-    flat.paste(icon, (0, 0), icon)
-    out_path = ROOT / "store-assets" / "store_icon_128.png"
-    flat.save(out_path)
-    print(f"wrote {out_path}")
-
-
 def main() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -163,7 +147,6 @@ def main() -> None:
         "screenshot_popup.png", "screenshot_popup_listing.png",
         "Live status at a glance", "Resume automation or toggle debug mode anytime",
     )
-    build_store_icon()
 
 
 if __name__ == "__main__":
