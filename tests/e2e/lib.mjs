@@ -187,9 +187,17 @@ export async function launch(browser, { dir, zip }) {
   const builder = new Builder();
   if (browser === 'edge') {
     const options = new edge.Options().addArguments(...CHROMIUM_ARGS(dir)).excludeSwitches('disable-extensions');
+    // Selenium Manager downloads its own build, as it does on a machine without Edge.
+    options.setBrowserVersion('stable');
     builder.forBrowser(Browser.EDGE).setEdgeOptions(options);
   } else {
     const options = new chrome.Options().addArguments(...CHROMIUM_ARGS(dir)).excludeSwitches('disable-extensions');
+    if (process.env.BROWSER_BINARY) {
+      options.setChromeBinaryPath(process.env.BROWSER_BINARY);
+    } else {
+      // Chrome for Testing, downloaded by Selenium Manager: the Chrome of the runner ignores --load-extension.
+      options.setBrowserVersion('stable');
+    }
     builder.forBrowser(Browser.CHROME).setChromeOptions(options);
   }
   const driver = await builder.build();
