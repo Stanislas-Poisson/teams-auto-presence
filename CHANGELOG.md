@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1 - 2026-10-12
+
+- Fix: the popup registered one more click listener on the access button at each state change (a block was pasted inside the storage listener). Each click sent one permission request per listener.
+
 ## 1.1.0 - 2026-10-06
 
 - The CI checks both zips (and that only the Firefox one carries the add-on id), lints the Firefox package with web-ext, and the release writes one checksum per zip.
