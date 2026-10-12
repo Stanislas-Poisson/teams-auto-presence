@@ -109,12 +109,14 @@ Firefox: the host permissions are granted by the user. Open the popup and click 
 
 ## Stores
 
-| Store | Package | Account | Update |
+| Store | Package | Where to submit | Listing |
 |---|---|---|---|
-| Chrome Web Store | Chromium zip | Chrome Web Store developer account | Listed: https://chromewebstore.google.com/detail/teams-auto-presence/ccecckoeekjnndicanahkpoblpgdocel |
-| Microsoft Edge Add-ons | Chromium zip | Microsoft Partner Center | Issue #4 |
-| Firefox Add-ons (AMO) | Firefox zip | addons.mozilla.org | Issue #6 |
-| Opera add-ons | Chromium zip | addons.opera.com | Not planned yet |
+| Chrome Web Store | Chromium zip | https://chrome.google.com/webstore/devconsole | https://chromewebstore.google.com/detail/teams-auto-presence/ccecckoeekjnndicanahkpoblpgdocel |
+| Microsoft Edge Add-ons | Chromium zip | https://partner.microsoft.com/dashboard/microsoftedge/overview | Issue #4 |
+| Firefox Add-ons (AMO) | Firefox zip | https://addons.mozilla.org/developers/addon/submit/distribution | Issue #6 |
+| Opera add-ons | Chromium zip | https://addons.opera.com/developer/ | Not planned yet |
+
+Chrome Web Store: new item, then upload the zip. Edge: Partner Center, Microsoft Edge program, **Create new extension**. Firefox: choose **On this site** (listed), upload the Firefox zip, answer that the source code needs no build. Opera: sign in, **Upload new add-on**.
 
 Brave, Vivaldi and Arc install the Chrome Web Store listing. Safari needs a Mac and an Apple developer account: not planned.
 
