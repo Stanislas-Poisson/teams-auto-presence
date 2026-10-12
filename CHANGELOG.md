@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The CI loads the packages in Chrome, Edge and Firefox and plays the flow against a fake Teams page (`tests/e2e`).
+
 ## 1.1.1 - 2026-10-12
 
 - Fix: the popup registered one more click listener on the access button at each state change (a block was pasted inside the storage listener). Each click sent one permission request per listener.
