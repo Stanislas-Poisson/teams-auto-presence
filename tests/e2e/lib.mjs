@@ -165,6 +165,10 @@ const CHROMIUM_ARGS = (dir) => [
   '--headless=new',
   '--no-sandbox',
   '--disable-gpu',
+  '--disable-dev-shm-usage',
+  '--no-first-run',
+  '--no-default-browser-check',
+  '--disable-sync',
   '--window-size=1280,900',
   `--load-extension=${dir}`,
   // Recent Chrome and Edge ignore --load-extension unless this feature is disabled.
@@ -180,6 +184,7 @@ async function launchOnce(browser, { dir, zip }) {
     // geckodriver needs --allow-system-access to open the pages of the extension from the browser interface.
     const service = new firefox.ServiceBuilder().addArguments('--allow-system-access');
     const driver = await new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(options).setFirefoxService(service).build();
+    await driver.manage().setTimeouts({ pageLoad: 20_000, script: 20_000 });
     await driver.installAddon(zip, true);
     return { driver, base: `moz-extension://${FIREFOX_UUID}/` };
   }
@@ -201,6 +206,7 @@ async function launchOnce(browser, { dir, zip }) {
     builder.forBrowser(Browser.CHROME).setChromeOptions(options);
   }
   const driver = await builder.build();
+  await driver.manage().setTimeouts({ pageLoad: 20_000, script: 20_000 });
   return { driver, base: `chrome-extension://${chromiumId(dir)}/` };
 }
 
