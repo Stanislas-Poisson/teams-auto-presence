@@ -6,6 +6,6 @@
     "test": "node --test --test-concurrency=1 --test-timeout=240000 ./*.test.mjs"
   },
   "devDependencies": {
-    "selenium-webdriver": "4.50.0"
+    "selenium-webdriver": "4.51.0"
   }
 }
