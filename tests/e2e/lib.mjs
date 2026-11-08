@@ -175,15 +175,65 @@ const CHROMIUM_ARGS = (dir) => [
   '--disable-features=DisableLoadExtensionCommandLineSwitch',
 ];
 
-// Starts the browser with the extension loaded, and returns the driver and the base URL of its pages.
-async function launchOnce(browser, { dir, zip }) {
-  if (browser === 'firefox') {
+// The release asset that Selenium Manager could not download, as the error reports it.
+const GECKODRIVER_ASSET = /https:\/\/github\.com\/mozilla\/geckodriver\/releases\/download\/(v[\d.]+)\/(geckodriver-v[\d.]+-([\w-]+)\.tar\.gz)/;
+const GECKODRIVER_MIRROR = 'https://registry.npmmirror.com/-/binary/geckodriver';
+
+// GitHub Releases answers 504 now and then, and Selenium Manager has no other source for geckodriver (its mirror option needs a
+// geckodriver-support.json that the mirrors do not have). Downloads the very same asset from a mirror and hands it to Selenium
+// Manager through a temporary folder, used by this retry only (nothing is kept in the usual cache of the machine), and returns
+// true. Returns false when the error is not that download.
+async function useGeckodriverMirror(error) {
+  const match = GECKODRIVER_ASSET.exec(`${error?.message ?? ''} ${error?.cause?.message ?? ''}`);
+  if (!match) return false;
+  const [, version, asset, platform] = match;
+  const url = `${GECKODRIVER_MIRROR}/${version}/${asset}`;
+  console.log(`[e2e] geckodriver ${version} cannot be downloaded from GitHub, trying ${url}`);
+  const response = await fetch(url, { signal: AbortSignal.timeout(60_000) });
+  if (!response.ok) throw new Error(`the mirror answers ${response.status} for ${url}`);
+  const work = fs.mkdtempSync(path.join(os.tmpdir(), 'geckodriver-'));
+  const archive = path.join(work, asset);
+  fs.writeFileSync(archive, Buffer.from(await response.arrayBuffer()));
+  execFileSync('tar', ['-xzf', archive, '-C', work]);
+  const binary = path.join(work, 'geckodriver');
+  fs.chmodSync(binary, 0o755);
+  // What was downloaded must be a geckodriver of the version asked for, before it is trusted.
+  const reported = execFileSync(binary, ['--version'], { encoding: 'utf8' });
+  if (!reported.startsWith(`geckodriver ${version.slice(1)} `)) {
+    throw new Error(`the file of the mirror is not geckodriver ${version}: ${reported.split('\n')[0]}`);
+  }
+  // <folder>/geckodriver/<platform>/<version without the v>/geckodriver, the layout that Selenium Manager reads before it downloads.
+  const cache = path.join(work, 'selenium');
+  const target = path.join(cache, 'geckodriver', platform, version.slice(1));
+  fs.mkdirSync(target, { recursive: true });
+  fs.copyFileSync(binary, path.join(target, 'geckodriver'));
+  process.env.SE_CACHE_PATH = cache;
+  console.log(`[e2e] geckodriver ${version} comes from the mirror, in ${target}`);
+  return true;
+}
+
+// Starts Firefox. When Selenium Manager cannot download geckodriver from GitHub, retries once with the mirror.
+async function buildFirefox() {
+  const build = async () => {
     const options = new firefox.Options()
       .addArguments('-headless')
       .setPreference('extensions.webextensions.uuids', JSON.stringify({ [FIREFOX_ID]: FIREFOX_UUID }));
     // geckodriver needs --allow-system-access to open the pages of the extension from the browser interface.
     const service = new firefox.ServiceBuilder().addArguments('--allow-system-access');
-    const driver = await new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(options).setFirefoxService(service).build();
+    return new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(options).setFirefoxService(service).build();
+  };
+  try {
+    return await build();
+  } catch (error) {
+    if (!(await useGeckodriverMirror(error))) throw error;
+    return build();
+  }
+}
+
+// Starts the browser with the extension loaded, and returns the driver and the base URL of its pages.
+async function launchOnce(browser, { dir, zip }) {
+  if (browser === 'firefox') {
+    const driver = await buildFirefox();
     await driver.manage().setTimeouts({ pageLoad: 60_000, script: 60_000 });
     await driver.installAddon(zip, true);
     return { driver, base: `moz-extension://${FIREFOX_UUID}/` };
